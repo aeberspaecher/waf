@@ -3,6 +3,7 @@
 # Thomas Nagy, 2010
 
 import re
+import os
 
 import waflib
 import waflib.Logs as _msg
@@ -78,7 +79,13 @@ class cython(Task.Task):
 		"""
 		txt = self.inputs[0].read()
 
-		mods = []
+		# foo.pxd is an implicit dependency to foo.pyx if it exists:
+		abs_path = self.inputs[0].abspath()
+		if(os.path.exists(abs_path.replace(".pyx", ".pxd"))):
+			mods = [("%s"%self.inputs[0]).replace(".pyx", "")]
+		else:
+			mods = []
+
 		for m in re_cyt.finditer(txt):
 			if m.group(1):  # matches "from foo import bar"
 				mods.append(m.group(1))
